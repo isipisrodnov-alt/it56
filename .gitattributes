@@ -1,2 +1,103 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+class User:
+    def __init__(self, username, password, role):
+        self.username = username
+        self.password = password
+        self.role = role
+        self.history = []
+
+class AnimeStore:
+    def __init__(self):
+        self.users = []
+        self.anime_list = []
+        self.current_user = None
+
+    def register_user(self, username, password, role):
+        user = User(username, password, role)
+        self.users.append(user)
+        print(f"Пользователь {username} зарегистрирован как {role}.")
+
+    def login(self, username, password):
+        for user in self.users:
+            if user.username == username and user.password == password:
+                self.current_user = user
+                print(f"Добро пожаловать, {username}!")
+                return True
+        print("Ошибка: неверное имя пользователя или пароль.")
+        return False
+
+    def add_anime(self, title, genre, rating):
+        if self.current_user and self.current_user.role == "admin":
+            self.anime_list.append({"title": title, "genre": genre, "rating": rating})
+            print(f"Аниме '{title}' добавлено.")
+        else:
+            print("Ошибка: недостаточно прав.")
+
+    def view_anime(self):
+        if self.anime_list:
+            print("Доступные аниме:")
+            for anime in self.anime_list:
+                print(f"{anime['title']} - Жанр: {anime['genre']}, Рейтинг: {anime['rating']}")
+        else:
+            print("Нет доступного аниме.")
+
+    def purchase_anime(self, title):
+        if self.current_user and self.current_user.role == "user":
+            for anime in self.anime_list:
+                if anime['title'] == title:
+                    self.current_user.history.append(title)
+                    print(f"Вы купили аниме '{title}'.")
+                    return
+            print("Ошибка: аниме не найдено.")
+        else:
+            print("Ошибка: недостаточно прав.")
+
+    def view_history(self):
+        if self.current_user:
+            print("История покупок:")
+            for title in self.current_user.history:
+                print(title)
+
+    def run(self):
+        while True:
+            print("\nДобро пожаловать в аниме-магазин!")
+            action = input("1. Регистрация\n2. Вход\n3. Выход\nВыберите действие: ")
+            if action == "1":
+                username = input("Введите имя пользователя: ")
+                password = input("Введите пароль: ")
+                role = input("Введите роль (user/admin): ")
+                self.register_user(username, password, role)
+            elif action == "2":
+                username = input("Введите имя пользователя: ")
+                password = input("Введите пароль: ")
+                if self.login(username, password):
+                    while True:
+                        if self.current_user.role == "user":
+                            user_action = input("\n1. Просмотреть аниме\n2. Купить аниме\n3. Просмотреть историю\n4. Выйти\nВыберите действие: ")
+                            if user_action == "1":
+                                self.view_anime()
+                            elif user_action == "2":
+                                title = input("Введите название аниме для покупки: ")
+                                self.purchase_anime(title)
+                            elif user_action == "3":
+                                self.view_history()
+                            elif user_action == "4":
+                                self.current_user = None
+                                break
+                        elif self.current_user.role == "admin":
+                            admin_action = input("\n1. Добавить аниме\n2. Просмотреть аниме\n3. Выйти\nВыберите действие: ")
+                            if admin_action == "1":
+                                title = input("Введите название аниме: ")
+                                genre = input("Введите жанр: ")
+                                rating = float(input("Введите рейтинг: "))
+                                self.add_anime(title, genre, rating)
+                            elif admin_action == "2":
+                                self.view_anime()
+                            elif admin_action == "3":
+                                self.current_user = None
+                                break
+            elif action == "3":
+                print("Выход из программы.")
+                break
+if __name__ == "__main__":
+    store = AnimeStore()
+    store.run()
