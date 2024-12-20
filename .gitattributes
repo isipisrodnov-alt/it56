@@ -1,103 +1,87 @@
-class User:
-    def __init__(self, username, password, role):
-        self.username = username
-        self.password = password
-        self.role = role
-        self.history = []
+from functools import reduce
 
-class AnimeStore:
-    def __init__(self):
-        self.users = []
-        self.anime_list = []
-        self.current_user = None
+def display_menu():
+    print("\nВыберите действие:")
+    print("1. Добавить аниме")
+    print("2. Удалить аниме")
+    print("3. Поиск аниме")
+    print("4. Сортировка")
+    print("5. Фильтрация")
+    print("6. Выход")
 
-    def register_user(self, username, password, role):
-        user = User(username, password, role)
-        self.users.append(user)
-        print(f"Пользователь {username} зарегистрирован как {role}.")
+def add_item(data):
+    item = input("Введите аниме для добавления: ")
+    genre = input("Введите жанр аниме: ")
+    age_rating = input("Введите возрастное ограничение аниме: ")
+    data.append({'title': item.strip(), 'genre': genre.strip(), 'age_rating': age_rating.strip()})
+    print(f"Аниме '{item.strip()}' добавлено.")
 
-    def login(self, username, password):
-        for user in self.users:
-            if user.username == username and user.password == password:
-                self.current_user = user
-                print(f"Добро пожаловать, {username}!")
-                return True
-        print("Ошибка: неверное имя пользователя или пароль.")
-        return False
+def remove_item(data):
+    item = input("Введите аниме для удаления: ")
+    try:
+        data[:] = [anime for anime in data if anime['title'] != item.strip()]
+        print(f"Аниме '{item.strip()}' удалено.")
+    except ValueError:
+        print(f"Аниме '{item.strip()}' не найдено.")
 
-    def add_anime(self, title, genre, rating):
-        if self.current_user and self.current_user.role == "admin":
-            self.anime_list.append({"title": title, "genre": genre, "rating": rating})
-            print(f"Аниме '{title}' добавлено.")
+def search_item(data):
+    keyword = input("Введите ключевое слово для поиска: ")
+    results = list(filter(lambda x: keyword.lower() in x['title'].lower(), data))
+    if results:
+        print("Найденные аниме:")
+        for result in results:
+            print(f"{result['title']} (Жанр: {result['genre']}, Возрастное ограничение: {result['age_rating']})")
+    else:
+        print("Аниме не найдены.")
+
+def sort_data(data):
+    print("\nВыберите способ сортировки:")
+    print("1. По алфавиту")
+    print("2. По количеству символов")
+    
+    choice = input("Ваш выбор: ")
+    
+    if choice == '1':
+        sorted_data = sorted(data, key=lambda x: x['title'])
+        print("Отсортированные аниме по алфавиту:")
+    elif choice == '2':
+        sorted_data = sorted(data, key=lambda x: len(x['title']))
+        print("Отсортированные аниме по количеству символов:")
+    else:
+        print("Некорректный ввод. Сортировка не выполнена.")
+        return
+
+    for item in sorted_data:
+        print(f"{item['title']} (Жанр: {item['genre']}, Возрастное ограничение: {item['age_rating']})")
+
+def filter_data(data):
+    genre_filter = input("Введите жанр для фильтрации: ")
+    filtered = list(filter(lambda x: x['genre'].lower() == genre_filter.lower(), data))
+    print("Отфильтрованные данные:")
+    for item in filtered:
+        print(f"{item['title']} (Жанр: {item['genre']}, Возрастное ограничение: {item['age_rating']})")
+
+def main():
+    data = []
+    while True:
+        display_menu()
+        choice = input("Ваш выбор: ")
+
+        if choice == '1':
+            add_item(data)
+        elif choice == '2':
+            remove_item(data)
+        elif choice == '3':
+            search_item(data)
+        elif choice == '4':
+            sort_data(data)
+        elif choice == '5':
+            filter_data(data)
+        elif choice == '6':
+            print("Выход из программы.")
+            break
         else:
-            print("Ошибка: недостаточно прав.")
+            print("Некорректный ввод. Пожалуйста, выберите действие из меню.")
 
-    def view_anime(self):
-        if self.anime_list:
-            print("Доступные аниме:")
-            for anime in self.anime_list:
-                print(f"{anime['title']} - Жанр: {anime['genre']}, Рейтинг: {anime['rating']}")
-        else:
-            print("Нет доступного аниме.")
-
-    def purchase_anime(self, title):
-        if self.current_user and self.current_user.role == "user":
-            for anime in self.anime_list:
-                if anime['title'] == title:
-                    self.current_user.history.append(title)
-                    print(f"Вы купили аниме '{title}'.")
-                    return
-            print("Ошибка: аниме не найдено.")
-        else:
-            print("Ошибка: недостаточно прав.")
-
-    def view_history(self):
-        if self.current_user:
-            print("История покупок:")
-            for title in self.current_user.history:
-                print(title)
-
-    def run(self):
-        while True:
-            print("\nДобро пожаловать в аниме-магазин!")
-            action = input("1. Регистрация\n2. Вход\n3. Выход\nВыберите действие: ")
-            if action == "1":
-                username = input("Введите имя пользователя: ")
-                password = input("Введите пароль: ")
-                role = input("Введите роль (user/admin): ")
-                self.register_user(username, password, role)
-            elif action == "2":
-                username = input("Введите имя пользователя: ")
-                password = input("Введите пароль: ")
-                if self.login(username, password):
-                    while True:
-                        if self.current_user.role == "user":
-                            user_action = input("\n1. Просмотреть аниме\n2. Купить аниме\n3. Просмотреть историю\n4. Выйти\nВыберите действие: ")
-                            if user_action == "1":
-                                self.view_anime()
-                            elif user_action == "2":
-                                title = input("Введите название аниме для покупки: ")
-                                self.purchase_anime(title)
-                            elif user_action == "3":
-                                self.view_history()
-                            elif user_action == "4":
-                                self.current_user = None
-                                break
-                        elif self.current_user.role == "admin":
-                            admin_action = input("\n1. Добавить аниме\n2. Просмотреть аниме\n3. Выйти\nВыберите действие: ")
-                            if admin_action == "1":
-                                title = input("Введите название аниме: ")
-                                genre = input("Введите жанр: ")
-                                rating = float(input("Введите рейтинг: "))
-                                self.add_anime(title, genre, rating)
-                            elif admin_action == "2":
-                                self.view_anime()
-                            elif admin_action == "3":
-                                self.current_user = None
-                                break
-            elif action == "3":
-                print("Выход из программы.")
-                break
 if __name__ == "__main__":
-    store = AnimeStore()
-    store.run()
+    main()
