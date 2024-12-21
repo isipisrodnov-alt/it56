@@ -1,0 +1,87 @@
+from functools import reduce
+
+def display_menu():
+    print("\nВыберите действие:")
+    print("1. Добавить аниме")
+    print("2. Удалить аниме")
+    print("3. Поиск аниме")
+    print("4. Сортировка")
+    print("5. Фильтрация")
+    print("6. Выход")
+
+def add_item(data):
+    item = input("Введите аниме для добавления: ")
+    genre = input("Введите жанр аниме: ")
+    age_rating = input("Введите возрастное ограничение аниме: ")
+    data.append({'title': item.strip(), 'genre': genre.strip(), 'age_rating': age_rating.strip()})
+    print(f"Аниме '{item.strip()}' добавлено.")
+
+def remove_item(data):
+    item = input("Введите аниме для удаления: ")
+    try:
+        data[:] = [anime for anime in data if anime['title'] != item.strip()]
+        print(f"Аниме '{item.strip()}' удалено.")
+    except ValueError:
+        print(f"Аниме '{item.strip()}' не найдено.")
+
+def search_item(data):
+    keyword = input("Введите ключевое слово для поиска: ")
+    results = list(filter(lambda x: keyword.lower() in x['title'].lower(), data))
+    if results:
+        print("Найденные аниме:")
+        for result in results:
+            print(f"{result['title']} (Жанр: {result['genre']}, Возрастное ограничение: {result['age_rating']})")
+    else:
+        print("Аниме не найдены.")
+
+def sort_data(data):
+    print("\nВыберите способ сортировки:")
+    print("1. По алфавиту")
+    print("2. По количеству символов")
+    
+    choice = input("Ваш выбор: ")
+    
+    if choice == '1':
+        sorted_data = sorted(data, key=lambda x: x['title'])
+        print("Отсортированные аниме по алфавиту:")
+    elif choice == '2':
+        sorted_data = sorted(data, key=lambda x: len(x['title']))
+        print("Отсортированные аниме по количеству символов:")
+    else:
+        print("Некорректный ввод. Сортировка не выполнена.")
+        return
+
+    for item in sorted_data:
+        print(f"{item['title']} (Жанр: {item['genre']}, Возрастное ограничение: {item['age_rating']})")
+
+def filter_data(data):
+    genre_filter = input("Введите жанр для фильтрации: ")
+    filtered = list(filter(lambda x: x['genre'].lower() == genre_filter.lower(), data))
+    print("Отфильтрованные данные:")
+    for item in filtered:
+        print(f"{item['title']} (Жанр: {item['genre']}, Возрастное ограничение: {item['age_rating']})")
+
+def main():
+    data = []
+    while True:
+        display_menu()
+        choice = input("Ваш выбор: ")
+
+        if choice == '1':
+            add_item(data)
+        elif choice == '2':
+            remove_item(data)
+        elif choice == '3':
+            search_item(data)
+        elif choice == '4':
+            sort_data(data)
+        elif choice == '5':
+            filter_data(data)
+        elif choice == '6':
+            print("Выход из программы.")
+            break
+        else:
+            print("Некорректный ввод. Пожалуйста, выберите действие из меню.")
+
+if __name__ == "__main__":
+    main()
