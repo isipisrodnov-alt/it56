@@ -1,0 +1,147 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+
+class Book
+{
+    public string Title { get; set; }
+    public string Author { get; set; }
+    public bool IsAvailable { get; set; }
+
+    public Book(string title, string author)
+    {
+        Title = title;
+        Author = author;
+        IsAvailable = true;
+    }
+
+    public void ChangeStatus()
+    {
+        IsAvailable = !IsAvailable;
+    }
+}
+
+class User
+{
+    public string Name { get; set; }
+    public List<Book> BorrowedBooks { get; set; }
+
+    public User(string name)
+    {
+        Name = name;
+        BorrowedBooks = new List<Book>();
+    }
+
+    public void BorrowBook(Book book)
+    {
+        if (book.IsAvailable)
+        {
+            book.ChangeStatus();
+            BorrowedBooks.Add(book);
+        }
+        else
+        {
+            Console.WriteLine($"Книга '{book.Title}' уже выдана.");
+        }
+    }
+
+    public void ReturnBook(Book book)
+    {
+        if (BorrowedBooks.Contains(book))
+        {
+            book.ChangeStatus();
+            BorrowedBooks.Remove(book);
+        }
+    }
+}
+
+class Librarian
+{
+    public string Name { get; set; }
+
+    public Librarian(string name)
+    {
+        Name = name;
+    }
+
+    public void AddBook(List<Book> books, string title, string author)
+    {
+        books.Add(new Book(title, author));
+    }
+
+    public void RemoveBook(List<Book> books, Book book)
+    {
+        books.Remove(book);
+    }
+
+    public void RegisterUser(List<User> users, string name)
+    {
+        users.Add(new User(name));
+    }
+}
+
+class Library
+{
+    public List<Book> Books { get; set; }
+    public List<User> Users { get; set; }
+
+    public Library()
+    {
+        Books = new List<Book>();
+        Users = new List<User>();
+    }
+
+    public void LoadData()
+    {
+        // Загрузка данных из файлов (например, books.txt и users.txt)
+    }
+
+    public void SaveData()
+    {
+        // Сохранение данных в файлы
+    }
+
+    public void ShowAvailableBooks()
+    {
+        foreach (var book in Books)
+        {
+            if (book.IsAvailable)
+            {
+                Console.WriteLine($"Название: {book.Title}, Автор: {book.Author}");
+            }
+        }
+    }
+}
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Library library = new Library();
+        library.LoadData();
+
+        Console.WriteLine("Выберите роль: 1 - Библиотекарь, 2 - Пользователь");
+        int role = int.Parse(Console.ReadLine());
+
+        if (role == 1)
+        {
+            // Логика для библиотекаря
+            Librarian librarian = new Librarian("Библиотекарь");
+
+            // Пример: Добавление новой книги
+            librarian.AddBook(library.Books, "1984", "Джордж Оруэлл");
+            // Другие действия библиотекаря...
+        }
+        else if (role == 2)
+        {
+            // Логика для пользователя
+            User user = new User("Пользователь");
+
+            // Пример: Просмотр доступных книг
+            library.ShowAvailableBooks();
+            // Другие действия пользователя...
+        }
+
+        library.SaveData();
+    }
+}
